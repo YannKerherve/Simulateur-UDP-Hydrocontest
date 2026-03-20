@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guide — Simulateur Hydrocontest</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #F4F1EB;
+    --surface:   #FFFFFF;
+    --border:    #E2DDD6;
+    --accent:    #1B6CA8;
+    --accent2:   #0E9F6E;
+    --warn:      #D97706;
+    --text:      #1A1A1A;
+    --muted:     #6B6B6B;
+    --mono:      'DM Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--text);
+    color: #fff;
+    padding: 48px 0 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.02) 40px,
+      rgba(255,255,255,0.02) 41px
+    );
+  }
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  header h1 {
+    font-family: var(--sans);
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  header h1 span { color: #38BDF8; }
+  header p {
+    color: rgba(255,255,255,0.55);
+    font-size: 14px;
+    font-family: var(--mono);
+  }
+
+  /* ── SOMMAIRE ── */
+  .toc-wrap {
+    max-width: 860px;
+    margin: 32px auto;
+    padding: 0 32px;
+  }
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 32px;
+  }
+  .toc-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    grid-column: 1/-1;
+  }
+  .toc a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px dashed transparent;
+    transition: border-color .2s;
+  }
+  .toc a:hover { border-color: var(--accent); }
+  .toc a .n {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 18px;
+  }
+
+  /* ── LAYOUT ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto 64px;
+    padding: 0 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* ── STEP CARD ── */
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeUp .4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .step:nth-child(1)  { animation-delay: .05s; }
+  .step:nth-child(2)  { animation-delay: .10s; }
+  .step:nth-child(3)  { animation-delay: .15s; }
+  .step:nth-child(4)  { animation-delay: .20s; }
+  .step:nth-child(5)  { animation-delay: .25s; }
+  .step:nth-child(6)  { animation-delay: .30s; }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFAF8;
+  }
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--text);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .step-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ── IMAGE PLACEHOLDER ── */
+  .img-block {
+    border: 2px dashed var(--border);
+    border-radius: 6px;
+    background: #FAFAF8;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+  }
+  .img-block .img-icon {
+    font-size: 28px;
+    opacity: 0.4;
+  }
+  .img-block .img-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: #EFF6FF;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid #BFDBFE;
+  }
+  .img-block .img-desc {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 440px;
+  }
+  /* Quand l'image est présente */
+  .img-block img {
+    max-width: 100%;
+    border-radius: 4px;
+    display: block;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .callout.info  { background: #EFF6FF; border-left: 3px solid var(--accent); }
+  .callout.ok    { background: #ECFDF5; border-left: 3px solid var(--accent2); }
+  .callout.warn  { background: #FFFBEB; border-left: 3px solid var(--warn); }
+  .callout .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout strong { font-weight: 600; }
+
+  /* ── CODE / MONO ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: #F1EEE8;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #B45309;
+  }
+  .url {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: #EFF6FF;
+    color: var(--accent);
+    padding: 8px 14px;
+    border-radius: 5px;
+    border: 1px solid #BFDBFE;
+    display: inline-block;
+  }
+
+  /* ── LISTE NUMÉROTÉE CUSTOM ── */
+  ol.steps-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    counter-reset: step-counter;
+  }
+  ol.steps-list li {
+    counter-increment: step-counter;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 14px;
+  }
+  ol.steps-list li::before {
+    content: counter(step-counter);
+    min-width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ── TABLE IP ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: #F4F1EB;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  td:first-child { font-family: var(--mono); font-size: 12px; }
+  tr:last-child td { border-bottom: none; }
+  .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header h1 { font-size: 26px; }
+    .toc { grid-template-columns: 1fr; }
+    main { padding: 0 16px; }
+    .header-inner { padding: 0 16px; }
+    .toc-wrap { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="badge">Documentation</div>
+    <h1>Simulateur <span>Hydrocontest</span> by ENSM</h1>
+    <p>Guide de prise en main · v1.0 · Yann Kerhervé</p>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════ SOMMAIRE -->
+<div class="toc-wrap">
+  <div class="toc">
+    <div class="toc-title">Sommaire</div>
+    <a href="#s1"><span class="n">01</span> Télécharger et ouvrir le logiciel</a>
+    <a href="#s4"><span class="n">04</span> Connecter chaque drone</a>
+    <a href="#s2"><span class="n">02</span> Les deux fenêtres</a>
+    <a href="#s5"><span class="n">05</span> Lancer hydro_server.py</a>
+    <a href="#s3"><span class="n">03</span> Démarrer la simulation</a>
+    <a href="#s6"><span class="n">06</span> Tester avec OpenCPN</a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ STEPS -->
+<main>
+
+  <!-- ── ÉTAPE 1 ── -->
+  <div class="step" id="s1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-title">Télécharger et ouvrir le logiciel</div>
+    </div>
+    <div class="step-body">
+      <p>Téléchargez le fichier <code>Simulateur_Hydrocontest.exe</code> et double-cliquez dessus pour le lancer.</p>
+
+      <div class="img-block">
+<img src="icone_exe.png" alt="Icône du simulateur"/>
+        <div class="img-desc">Capture de l'icône du simulateur telle qu'elle apparaît dans l'explorateur Windows</div>
+        <!-- Remplacer par :  -->
+      </div>
+
+      <div class="callout warn">
+        <span class="icon">⚠️</span>
+        <div>Si Windows affiche un avertissement <strong>SmartScreen</strong>, cliquez sur <strong>« Informations complémentaires »</strong> puis <strong>« Exécuter quand même »</strong>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ÉTAPE 2 ── -->
+  <div class="step" id="s2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-title">Les deux fenêtres qui s'ouvrent</div>
+    </div>
+    <div class="step-body">
+      <p>Au démarrage, deux fenêtres apparaissent automatiquement :</p>
+
+      <ol class="steps-list">
+        <li><strong>La fenêtre logicielle</strong> — c'est la télécommande. Elle affiche les 6 drones avec leurs leviers de vitesse.</li>
+        <li><strong>Une page web</strong> dans votre navigateur — elle affiche la carte OpenStreetMap de la Rade Sud de Marseille avec les bateaux en temps réel.</li>
+      </ol>
+
+      <div class="img-block">
+<img src="fenetre_principale.png" alt="Fenêtre principale"/>
+        <div class="img-desc">La fenêtre principale avec les 6 cartes drones en ligne et la barre de contrôle en haut</div>
+
+      </div>
+
+      <div class="img-block">
+<img src="carte_navigateur.png" alt="Carte dans le navigateur"/>
+        <div class="img-desc">La carte Leaflet/OpenStreetMap dans le navigateur avec les 6 triangles de bateaux positionnés sur la rade</div>
+        <!-- Remplacer par :  -->
+      </div>
+
+      <div class="callout info">
+        <span class="icon">ℹ️</span>
+        <div>Si la carte ne s'ouvre pas automatiquement, cliquez sur le bouton <strong>🗺 OUVRIR CARTE</strong> en haut à droite de la fenêtre logicielle.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ÉTAPE 3 ── -->
+  <div class="step" id="s3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-title">Démarrer la simulation</div>
+    </div>
+    <div class="step-body">
+      <p>Cliquez sur le bouton <strong>▶ DÉMARRER TOUS</strong> — le grand bouton vert en haut à gauche de la fenêtre logicielle.</p>
+
+      <div class="img-block">
+<img src="bouton_demarrer.png" alt="Bouton démarrer"/>
+        <div class="img-desc">Zoom sur la barre de titre avec le bouton « DÉMARRER TOUS » en vert et les boutons ARRÊTER / RESET</div>
+        <!-- Remplacer par :  -->
+      </div>
+
+      <p>Les 6 bateaux sont alors <strong>prêts à naviguer</strong>. Ils démarreront dès que vous agirez sur leurs leviers de vitesse individuels.</p>
+    </div>
+  </div>
+
+  <!-- ── ÉTAPE 4 ── -->
+  <div class="step" id="s4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-title">Connecter chaque drone en UDP OUT</div>
+    </div>
+    <div class="step-body">
+      <p>Pour chaque drone, dans sa carte :</p>
+
+      <ol class="steps-list">
+        <li>Vérifiez que le protocole est bien réglé sur <code>UDP OUT</code> (c'est la valeur par défaut).</li>
+        <li>Si le simulateur et le serveur <code>hydro_server.py</code> tournent sur la <strong>même machine</strong>, l'IP affichée <code>127.0.0.1</code> convient. Sinon, saisissez l'IP réseau du serveur.</li>
+        <li>Cliquez sur <strong>CONNECT</strong>. Le bouton passe en vert.</li>
+      </ol>
+
+      <div class="img-block">
+<img src="drone_connecte.png" alt="Drone connecté"/>
+        <div class="img-desc">Une carte drone avec UDP OUT sélectionné, IP 127.0.0.1, bouton DISCONNECT vert — et le levier poussé à mi-course</div>
+        <!-- Remplacer par :  -->
+      </div>
+
+      <p>Référence des ports utilisés :</p>
+      <table>
+        <tr><th>Drone</th><th>Port UDP</th><th>Statut</th></tr>
+        <tr><td>Drone 1</td><td>14551</td><td><span class="dot" style="background:#38BDF8"></span>Bleu</td></tr>
+        <tr><td>Drone 2</td><td>14552</td><td><span class="dot" style="background:#FB923C"></span>Orange</td></tr>
+        <tr><td>Drone 3</td><td>14553</td><td><span class="dot" style="background:#4ADE80"></span>Vert</td></tr>
+        <tr><td>Drone 4</td><td>14554</td><td><span class="dot" style="background:#F472B6"></span>Rose</td></tr>
+        <tr><td>Drone 5</td><td>14555</td><td><span class="dot" style="background:#A78BFA"></span>Violet</td></tr>
+        <tr><td>Drone 6</td><td>14556</td><td><span class="dot" style="background:#FACC15"></span>Jaune</td></tr>
+      </table>
+
+      <p>Agissez ensuite sur les <strong>leviers de vitesse</strong> de chaque drone pour les faire avancer. Les traces apparaissent en temps réel sur la carte.</p>
+
+      <div class="img-block">
+<img src="bateaux_en_mouvement.png" alt="Bateaux en mouvement"/>
+        <div class="img-desc">La carte avec les 6 triangles en mouvement et leurs traces colorées visibles derrière eux</div>
+        <!-- Remplacer par :  -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ÉTAPE 5 ── -->
+  <div class="step" id="s5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-title">Lancer hydro_server.py</div>
+    </div>
+    <div class="step-body">
+      <p>Ouvrez le dossier <code>hydro_contest</code> et lancez <code>hydro_server.py</code> avec Thonny :</p>
+
+      <ol class="steps-list">
+        <li>Ouvrir <strong>Thonny Python</strong></li>
+        <li>Ouvrir le fichier <code>hydro_server.py</code> via <em>Fichier → Ouvrir</em></li>
+        <li>Cliquer sur <strong>Exécuter le script courant</strong> (flèche blanche sur rond vert, ou <kbd>F5</kbd>)</li>
+      </ol>
+
+      <div class="img-block">
+<img src="thonny_execution.png" alt="Thonny execution"/>
+        <div class="img-desc">Thonny avec hydro_server.py ouvert, curseur sur le bouton Run, et les logs qui apparaissent dans la console en bas</div>
+        <!-- Remplacer par :  -->
+      </div>
+
+      <p>Les logs suivants doivent apparaître dans la console :</p>
+      <div style="background:#1A1A1A; border-radius:6px; padding:14px 16px; font-family:'DM Mono',monospace; font-size:11.5px; color:#A3E635; line-height:1.8; overflow-x:auto;">
+        INFO - Starting hydro<br>
+        INFO - Creating drones<br>
+        INFO - MAVLink Comms: 1 : 14551<br>
+        INFO - MAVLink Comms: 2 : 14552<br>
+        INFO - MAVLink Comms: 3 : 14553<br>
+        INFO - MAVLink Comms: 4 : 14554<br>
+        INFO - Starting NMEA2000 TCP server for Drone 1 on port 5001<br>
+        <span style="color:#94A3B8">...</span><br>
+        INFO - Web GUI is running on <span style="color:#38BDF8">http://0.0.0.0:8080</span>
+      </div>
+
+      <p>Rendez-vous ensuite dans votre navigateur à l'adresse :</p>
+      <div><span class="url">http://localhost:8080/</span></div>
+
+      <div class="callout ok">
+        <span class="icon">✅</span>
+        <div>Les données simulées (position, vitesse, courant, énergie) apparaissent sur l'interface web. Les bateaux se déplacent en fonction des leviers actionnés dans le simulateur.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ÉTAPE 6 ── -->
+  <div class="step" id="s6">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <div class="step-title">Tester avec OpenCPN (NMEA / AIS)</div>
+    </div>
+    <div class="step-body">
+      <p>Pour tester le flux NMEA vers les postes TimeZero des équipes, utilisez le logiciel gratuit <strong>OpenCPN</strong>.</p>
+
+      <ol class="steps-list">
+        <li>Ouvrir <strong>OpenCPN</strong></li>
+        <li>Aller dans <strong>Options → Connexions → Ajouter une connexion</strong></li>
+        <li>Choisir le protocole <strong>TCP</strong></li>
+        <li>Saisir l'adresse IP : <code>127.0.0.1</code></li>
+        <li>Saisir le port : <code>5001</code> (pour le Drone 1, <code>5002</code> pour le Drone 2, etc.)</li>
+        <li>Cocher <strong>Recevoir en entrée sur ce port</strong></li>
+        <li>Valider avec <strong>OK</strong></li>
+      </ol>
+
+      <div class="img-block">
+<img src="opencpn_connexion.png" alt="Configuration OpenCPN"/>
+        <div class="img-desc">Fenêtre de configuration de connexion dans OpenCPN : TCP, 127.0.01, port 5001, option « Recevoir en entrée » cochée</div>
+        <!-- Remplacer par :  -->
+      </div>
+
+      <p>Le bateau simulé apparaît sur la carte OpenCPN, ainsi que les <strong>cibles AIS</strong> des autres drones.</p>
+
+      <div class="img-block">
+<img src="opencpn_carte.png" alt="OpenCPN avec bateaux AIS"/>
+        <div class="img-desc">Carte OpenCPN avec le bateau principal et les cibles AIS des autres drones visibles sur la Rade de Marseille</div>
+        <!-- Remplacer par :  -->
+      </div>
+
+      <div class="callout info">
+        <span class="icon">ℹ️</span>
+        <div>Les ports NMEA TCP sont : <strong>5001 → Drone 1</strong>, <strong>5002 → Drone 2</strong>, <strong>5003 → Drone 3</strong>, <strong>5004 → Drone 4</strong>.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════ FOOTER -->
+<footer>
+  Simulateur Hydrocontest · Guide de prise en main · 2025
+</footer>
+
+</body>
+</html>
